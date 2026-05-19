@@ -10,6 +10,9 @@ import {
   Loader2,
   RefreshCw,
   Sparkles,
+  FileText,
+  FileJson,
+  File,
 } from "lucide-react";
 
 import {
@@ -22,6 +25,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { StageBadge, PhaseBadge } from "@/components/badges";
+import { RichTextEditor } from "@/components/rich-text-editor";
+import { downloadAsText, exportToDocs, exportToPdf } from "@/lib/export";
 
 export const Route = createFileRoute("/books/$bookId")({
   head: () => ({ meta: [{ title: "Workspace — Quill" }] }),
@@ -561,13 +566,82 @@ function DraftView({ bookId }: { bookId: string }) {
     queryFn: () => api.getDraft(bookId),
   });
 
+  const bookQ = useQuery({
+    queryKey: ["book", bookId],
+    queryFn: () => api.getBook(bookId),
+  });
+
+  const [editedContent, setEditedContent] = useState<string>("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  useEffect(() => {
+    if (data?.full_text && !editedContent) {
+      setEditedContent(data.full_text);
+    }
+  }, [data?.full_text, editedContent]);
+
+  const handleDownloadTxt = () => {
+    try {
+      const content = editedContent || data?.full_text || "";
+      downloadAsText(content, `${bookQ.data?.title || "manuscript"}.txt`);
+      toast.success("Downloaded as TXT");
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
+  const handleDownloadDocs = async () => {
+    try {
+      setIsExporting(true);
+      const content = editedContent || data?.full_text || "";
+      await exportToDocs(
+        bookQ.data?.title || "Manuscript",
+        content,
+        bookQ.data?.title || "manuscript"
+      );
+      toast.success("Downloaded as DOCX");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      setIsExporting(true);
+      const content = editedContent || data?.full_text || "";
+      exportToPdf(
+        bookQ.data?.title || "Manuscript",
+        content,
+        bookQ.data?.title || "manuscript"
+      );
+      toast.success("Downloaded as PDF");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <section className="space-y-6">
-      <div>
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">
-          Step 03
-        </p>
-        <h2 className="font-display text-4xl">Full draft</h2>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">
+            Step 03
+          </p>
+          <h2 className="font-display text-4xl">Full draft</h2>
+        </div>
+        {data && (
+          <Button
+            variant={isEditing ? "default" : "outline"}
+            onClick={() => setIsEditing(!isEditing)}
+          >
+            {isEditing ? "Done editing" : "Edit draft"}
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -579,11 +653,64 @@ function DraftView({ bookId }: { bookId: string }) {
           {(error as Error).message}
         </div>
       ) : data ? (
-        <div className="rounded-2xl border border-border bg-card p-10 shadow-sm">
-          <pre className="whitespace-pre-wrap font-serif text-[1.02rem] leading-[1.8] text-foreground">
-            {data.full_text}
-          </pre>
-        </div>
+        <>
+          {isEditing ? (
+            <RichTextEditor
+              value={editedContent}
+              onChange={setEditedContent}
+              placeholder="Edit your manuscript here..."
+            />
+          ) : (
+            <div className="rounded-2xl border border-border bg-card p-10 shadow-sm">
+              <pre className="whitespace-pre-wrap font-serif text-[1.02rem] leading-[1.8] text-foreground">
+                {editedContent || data.full_text}
+              </pre>
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card/50 p-4">
+            <span className="text-sm font-medium text-muted-foreground">
+              Download as:
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadTxt}
+              className="gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              TXT
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadDocs}
+              disabled={isExporting}
+              className="gap-2"
+            >
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileJson className="h-4 w-4" />
+              )}
+              DOCX
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadPdf}
+              disabled={isExporting}
+              className="gap-2"
+            >
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <File className="h-4 w-4" />
+              )}
+              PDF
+            </Button>
+          </div>
+        </>
       ) : null}
     </section>
   );

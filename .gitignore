@@ -2,3 +2,9 @@
 node_modules
 dist
 .tanstack
+*.log
+*.tsbuildinfo
+*.env
+*.env.local
+*.env.development
+.wrangler
