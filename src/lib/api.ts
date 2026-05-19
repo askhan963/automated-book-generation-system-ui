@@ -92,6 +92,8 @@ async function request<T>(
 export const api = {
   health: () => request<HealthResponse>("/health"),
 
+  listBooks: () => request<BookResponse[]>("/books"),
+
   generateOutline: (body: { title: string; notes?: string }) =>
     request<BookResponse>("/generate-outline", { method: "POST", json: body }),
 

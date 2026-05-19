@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { getRecentBooks } from "@/lib/api";
+import { api } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, BookMarked } from "lucide-react";
 
 export const Route = createFileRoute("/library")({
@@ -13,7 +14,19 @@ export const Route = createFileRoute("/library")({
 });
 
 function LibraryPage() {
-  const books = getRecentBooks();
+  const { data: books = [], isLoading } = useQuery({
+    queryKey: ["books"],
+    queryFn: () => api.listBooks(),
+  });
+
+  if (isLoading) {
+    return (
+      <main className="mx-auto max-w-4xl px-6 py-16">
+        <p className="text-muted-foreground">Loading books...</p>
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto max-w-4xl px-6 py-16">
       <header className="mb-10 flex items-end justify-between">
@@ -36,7 +49,7 @@ function LibraryPage() {
           <BookMarked className="mx-auto h-8 w-8 text-muted-foreground" />
           <p className="mt-4 font-display text-2xl">The shelf is empty</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Books you start will appear here on this device.
+            Books you start will appear here.
           </p>
         </div>
       ) : (
@@ -51,7 +64,7 @@ function LibraryPage() {
                 <div>
                   <p className="font-display text-2xl">{b.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    Last opened {new Date(b.updated_at).toLocaleString()}
+                    Last updated {new Date(b.updated_at).toLocaleString()}
                   </p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
