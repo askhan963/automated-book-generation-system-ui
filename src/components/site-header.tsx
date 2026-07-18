@@ -51,6 +51,14 @@ export function SiteHeader() {
               Analytics
             </Link>
           )}
+          {!isLoading && user && (
+            <Link
+              to="/projects"
+              className={linkClass(path.startsWith("/projects"))}
+            >
+              Projects
+            </Link>
+          )}
           <Link
             to="/status"
             className="ml-1 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-muted-foreground hover:bg-muted"

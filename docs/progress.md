@@ -90,15 +90,15 @@ Client-side DOCX/PDF in `src/lib/export.ts` is separate from backend export rout
 
 | Endpoint                                   | Client | UI  |
 | ------------------------------------------ | ------ | --- |
-| `POST /projects/`                          | [ ]    | [ ] |
-| `GET /projects/`                           | [ ]    | [ ] |
-| `GET /projects/{proj_id}`                  | [ ]    | [ ] |
-| `PATCH /projects/{proj_id}`                | [ ]    | [ ] |
-| `DELETE /projects/{proj_id}`               | [ ]    | [ ] |
-| `POST /projects/{proj_id}/keys`            | [ ]    | [ ] |
-| `GET /projects/{proj_id}/keys`             | [ ]    | [ ] |
-| `PATCH /projects/{proj_id}/keys/{key_id}`  | [ ]    | [ ] |
-| `DELETE /projects/{proj_id}/keys/{key_id}` | [ ]    | [ ] |
+| `POST /projects/`                          | [x]    | [x] |
+| `GET /projects/`                           | [x]    | [x] |
+| `GET /projects/{proj_id}`                  | [x]    | [x] |
+| `PATCH /projects/{proj_id}`                | [x]    | [x] |
+| `DELETE /projects/{proj_id}`               | [x]    | [x] |
+| `POST /projects/{proj_id}/keys`            | [x]    | [x] |
+| `GET /projects/{proj_id}/keys`             | [x]    | [x] |
+| `PATCH /projects/{proj_id}/keys/{key_id}`  | [x]    | [x] |
+| `DELETE /projects/{proj_id}/keys/{key_id}` | [x]    | [x] |
 
 ---
 

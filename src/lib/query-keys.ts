@@ -7,4 +7,7 @@ export const queryKeys = {
   book: (id: string) => ["book", id] as const,
   chapters: (id: string) => ["chapters", id] as const,
   draft: (id: string) => ["draft", id] as const,
+  projects: ["projects"] as const,
+  project: (id: string) => ["project", id] as const,
+  projectKeys: (id: string) => ["project-keys", id] as const,
 };

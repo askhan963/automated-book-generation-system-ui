@@ -161,6 +161,47 @@ export interface StatsResponse {
   token_consumption_trends: TokenTrendPoint[];
 }
 
+export interface Project {
+  id: string;
+  name: string;
+  description: string | null;
+  owner_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateProjectBody {
+  name: string;
+  description?: string;
+}
+
+export interface UpdateProjectBody {
+  name?: string;
+  description?: string;
+}
+
+export interface ProjectApiKey {
+  id: string;
+  created_at: string;
+  expires_at: string | null;
+  revoked: boolean;
+}
+
+export interface ProjectApiKeyCreated {
+  api_key: string;
+  key_id: string;
+  expires_at: string | null;
+}
+
+export interface ProjectApiKeysResponse {
+  keys: ProjectApiKey[];
+}
+
+export interface UpdateProjectKeyParams {
+  revoke?: boolean;
+  expires_at?: string;
+}
+
 function handleUnauthorized(): void {
   clearToken();
   notifyUnauthorized();
@@ -378,4 +419,40 @@ export const api = {
   /** Authenticated export job; returns a relative `/exports/...` URL. */
   exportBook: (id: string, format: ExportFormat) =>
     request<ExportUrlResponse>(`/books/${id}/export/${format}`),
+
+  listProjects: () => request<Project[]>("/projects/"),
+
+  createProject: (body: CreateProjectBody) =>
+    request<Project>("/projects/", { method: "POST", json: body }),
+
+  getProject: (id: string) => request<Project>(`/projects/${id}`),
+
+  updateProject: (id: string, body: UpdateProjectBody) =>
+    request<Project>(`/projects/${id}`, { method: "PATCH", json: body }),
+
+  deleteProject: (id: string) =>
+    request<void>(`/projects/${id}`, { method: "DELETE" }),
+
+  listProjectKeys: (projectId: string) =>
+    request<ProjectApiKeysResponse>(`/projects/${projectId}/keys`),
+
+  createProjectKey: (projectId: string) =>
+    request<ProjectApiKeyCreated>(`/projects/${projectId}/keys`, {
+      method: "POST",
+    }),
+
+  updateProjectKey: (
+    projectId: string,
+    keyId: string,
+    params: UpdateProjectKeyParams,
+  ) =>
+    request<ProjectApiKey>(
+      `/projects/${projectId}/keys/${keyId}${buildQuery(params)}`,
+      { method: "PATCH" },
+    ),
+
+  deleteProjectKey: (projectId: string, keyId: string) =>
+    request<void>(`/projects/${projectId}/keys/${keyId}`, {
+      method: "DELETE",
+    }),
 };
