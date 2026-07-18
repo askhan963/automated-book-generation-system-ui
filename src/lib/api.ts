@@ -1,4 +1,4 @@
-import { clearToken, getToken } from "@/lib/auth-storage";
+import { clearToken, getToken, notifyUnauthorized } from "@/lib/auth-storage";
 
 export const API_BASE =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
@@ -76,6 +76,7 @@ export interface HealthResponse {
 
 function handleUnauthorized(): void {
   clearToken();
+  notifyUnauthorized();
   if (typeof window === "undefined") return;
   const path = window.location.pathname;
   if (path === "/login" || path === "/register") return;

@@ -26,7 +26,7 @@ type AuthValues = z.infer<typeof authSchema>;
 type AuthMode = "login" | "register";
 
 export function AuthPage({ mode }: { mode: AuthMode }) {
-  const { user, login, register, logout } = useAuth();
+  const { user, isLoading, login, register, logout } = useAuth();
   const navigate = useNavigate();
   const isLogin = mode === "login";
   const form = useForm<AuthValues>({
@@ -49,6 +49,21 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
         error instanceof Error ? error.message : "Authentication failed",
       );
     }
+  }
+
+  if (isLoading) {
+    return (
+      <main
+        className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-lg items-center justify-center px-6 py-16"
+        role="status"
+        aria-live="polite"
+      >
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+          Checking your session…
+        </div>
+      </main>
+    );
   }
 
   if (user) {

@@ -7,7 +7,12 @@ import {
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, type User } from "@/lib/api";
-import { clearToken, getToken, setToken } from "@/lib/auth-storage";
+import {
+  clearToken,
+  getToken,
+  onUnauthorized,
+  setToken,
+} from "@/lib/auth-storage";
 import {
   AuthContext,
   authMeQueryKey,
@@ -23,6 +28,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setTokenState(getToken());
     setHydrated(true);
   }, []);
+
+  const clearSession = useCallback(() => {
+    setTokenState(null);
+    queryClient.setQueryData(authMeQueryKey, null);
+    queryClient.removeQueries({ queryKey: authMeQueryKey });
+    queryClient.clear();
+  }, [queryClient]);
+
+  useEffect(() => onUnauthorized(clearSession), [clearSession]);
 
   const meQuery = useQuery({
     queryKey: authMeQueryKey,
@@ -54,11 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     clearToken();
-    setTokenState(null);
-    queryClient.setQueryData(authMeQueryKey, null);
-    queryClient.removeQueries({ queryKey: authMeQueryKey });
-    queryClient.clear();
-  }, [queryClient]);
+    clearSession();
+  }, [clearSession]);
 
   const value = useMemo<AuthContextValue>(() => {
     const isLoading = !hydrated || (Boolean(token) && meQuery.isLoading);
