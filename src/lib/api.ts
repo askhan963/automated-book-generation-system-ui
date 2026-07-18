@@ -98,6 +98,16 @@ export interface GenerateOutlineBody extends BookStyleFields {
   notes?: string;
 }
 
+export interface CreateBookBody extends BookStyleFields {
+  title: string;
+  initial_notes?: string;
+  auto_approve_outline?: boolean;
+}
+
+export interface GenerateChapterBody extends BookStyleFields {
+  chapter_id: string;
+}
+
 export interface ChapterResponse {
   id: string;
   book_id: string;
@@ -275,8 +285,17 @@ export const api = {
 
   listBooks: () => request<BookResponse[]>("/books"),
 
+  createBook: (body: CreateBookBody) =>
+    request<BookResponse>("/books", { method: "POST", json: body }),
+
   generateOutline: (body: GenerateOutlineBody) =>
     request<BookResponse>("/generate-outline", { method: "POST", json: body }),
+
+  generateChapter: (body: GenerateChapterBody) =>
+    request<ChapterResponse>("/generate-chapter", {
+      method: "POST",
+      json: body,
+    }),
 
   getBook: (id: string) => request<BookResponse>(`/books/${id}`),
 
@@ -317,6 +336,12 @@ export const api = {
 
   regenerateChapter: (id: string) =>
     request<ChapterResponse>(`/chapters/${id}/regenerate`, { method: "POST" }),
+
+  moderateChapter: (bookId: string, chapterId: string) =>
+    request<ChapterResponse>(
+      `/books/${bookId}/chapters/${chapterId}/moderate`,
+      { method: "POST" },
+    ),
 
   /** Authenticated manuscript text download (final review must be cleared). */
   compileBook: (id: string) => requestBlob(`/books/${id}/compile`),

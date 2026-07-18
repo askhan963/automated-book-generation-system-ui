@@ -470,7 +470,7 @@ function ChaptersView({
 
         <div className="min-w-0">
           {selected ? (
-            <ChapterEditor chapter={selected} bookId={bookId} />
+            <ChapterEditor chapter={selected} book={book} bookId={bookId} />
           ) : (
             <div className="rounded-2xl border border-dashed border-border p-12 text-center">
               <BookOpen className="mx-auto h-8 w-8 text-muted-foreground" />
@@ -491,9 +491,11 @@ function ChaptersView({
 
 function ChapterEditor({
   chapter,
+  book,
   bookId,
 }: {
   chapter: ChapterResponse;
+  book: BookResponse;
   bookId: string;
 }) {
   const qc = useQueryClient();
@@ -541,6 +543,51 @@ function ChapterEditor({
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const generateContent = useMutation({
+    mutationFn: () =>
+      api.generateChapter({
+        chapter_id: chapter.id,
+        genre: book.genre ?? undefined,
+        tone: book.tone ?? undefined,
+        audience: book.audience ?? undefined,
+        length: book.length ?? undefined,
+      }),
+    onSuccess: (c) => {
+      qc.setQueryData(
+        queryKeys.chapters(bookId),
+        (prev: ChapterResponse[] = []) =>
+          prev.map((x) => (x.id === c.id ? c : x)),
+      );
+      void invalidateBookCaches(qc, bookId);
+      toast.success("Chapter content generated");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const moderate = useMutation({
+    mutationFn: () => api.moderateChapter(bookId, chapter.id),
+    onSuccess: (c) => {
+      qc.setQueryData(
+        queryKeys.chapters(bookId),
+        (prev: ChapterResponse[] = []) =>
+          prev.map((x) => (x.id === c.id ? c : x)),
+      );
+      void invalidateBookCaches(qc, bookId);
+      toast.success(
+        c.status === "approved"
+          ? "Moderation approved the chapter"
+          : "Moderation requested notes",
+      );
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const busy =
+    approve.isPending ||
+    regen.isPending ||
+    generateContent.isPending ||
+    moderate.isPending;
+
   return (
     <article className="space-y-5">
       <header className="flex flex-wrap items-end justify-between gap-3 border-b border-border pb-4">
@@ -584,9 +631,37 @@ function ChapterEditor({
           className="resize-none border-border bg-secondary/40"
         />
         <div className="flex flex-wrap items-center justify-end gap-2">
+          {!chapter.content && (
+            <Button
+              variant="outline"
+              disabled={busy}
+              onClick={() => generateContent.mutate()}
+            >
+              {generateContent.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 h-4 w-4" />
+              )}
+              Generate content
+            </Button>
+          )}
+          {chapter.content && (
+            <Button
+              variant="outline"
+              disabled={busy}
+              onClick={() => moderate.mutate()}
+            >
+              {moderate.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 h-4 w-4" />
+              )}
+              AI moderate
+            </Button>
+          )}
           <Button
             variant="outline"
-            disabled={regen.isPending}
+            disabled={busy || !chapter.content}
             onClick={() => regen.mutate()}
           >
             {regen.isPending ? (
@@ -597,7 +672,7 @@ function ChapterEditor({
             Regenerate with notes
           </Button>
           <Button
-            disabled={approve.isPending}
+            disabled={busy}
             onClick={() => approve.mutate("approved")}
             className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
           >

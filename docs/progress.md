@@ -52,27 +52,27 @@ Legend: `[ ]` todo · `[~]` partial · `[x]` done
 
 ## 3. Books & generation
 
-| Endpoint                                          | Client | UI  | Notes                       |
-| ------------------------------------------------- | ------ | --- | --------------------------- |
-| `GET /health`                                     | [x]    | [x] | Public (`/status`)          |
-| `GET /books`                                      | [x]    | [x] | Needs auth header           |
-| `POST /generate-outline`                          | [x]    | [x] | Style fields wired          |
-| `GET /books/{id}`                                 | [x]    | [x] |                             |
-| `PATCH /books/{id}/outline`                       | [x]    | [x] |                             |
-| `PATCH /books/{id}/final-review`                  | [x]    | [x] |                             |
-| `POST /books/{id}/chapters/next`                  | [x]    | [x] |                             |
-| `GET /books/{id}/chapters`                        | [x]    | [x] |                             |
-| `PATCH /chapters/{id}`                            | [x]    | [x] |                             |
-| `POST /chapters/{id}/regenerate`                  | [x]    | [x] |                             |
-| `GET /books/{id}/draft`                           | [x]    | [x] |                             |
-| `GET /books/{id}/compile`                         | [x]    | [x] | Authenticated blob download |
-| `POST /books`                                     | [ ]    | [ ] | Create + sync outline       |
-| `POST /generate-chapter`                          | [ ]    | [ ] |                             |
-| `POST /books/{id}/chapters/{chapter_id}/moderate` | [ ]    | [ ] |                             |
-| `GET /books/{id}/export/pdf`                      | [x]    | [x] | Returns `{ url }`           |
-| `GET /books/{id}/export/epub`                     | [x]    | [x] |                             |
-| `GET /books/{id}/export/markdown`                 | [x]    | [x] |                             |
-| `GET /books/{id}/export/html`                     | [x]    | [x] |                             |
+| Endpoint                                          | Client | UI  | Notes                                    |
+| ------------------------------------------------- | ------ | --- | ---------------------------------------- |
+| `GET /health`                                     | [x]    | [x] | Public (`/status`)                       |
+| `GET /books`                                      | [x]    | [x] | Needs auth header                        |
+| `POST /generate-outline`                          | [x]    | [x] | Style fields wired                       |
+| `GET /books/{id}`                                 | [x]    | [x] |                                          |
+| `PATCH /books/{id}/outline`                       | [x]    | [x] |                                          |
+| `PATCH /books/{id}/final-review`                  | [x]    | [x] |                                          |
+| `POST /books/{id}/chapters/next`                  | [x]    | [x] |                                          |
+| `GET /books/{id}/chapters`                        | [x]    | [x] |                                          |
+| `PATCH /chapters/{id}`                            | [x]    | [x] |                                          |
+| `POST /chapters/{id}/regenerate`                  | [x]    | [x] |                                          |
+| `GET /books/{id}/draft`                           | [x]    | [x] |                                          |
+| `GET /books/{id}/compile`                         | [x]    | [x] | Authenticated blob download              |
+| `POST /books`                                     | [x]    | [ ] | Client ready; home uses generate-outline |
+| `POST /generate-chapter`                          | [x]    | [x] | Empty-chapter generate action            |
+| `POST /books/{id}/chapters/{chapter_id}/moderate` | [x]    | [x] | AI moderate action                       |
+| `GET /books/{id}/export/pdf`                      | [x]    | [x] | Returns `{ url }`                        |
+| `GET /books/{id}/export/epub`                     | [x]    | [x] |                                          |
+| `GET /books/{id}/export/markdown`                 | [x]    | [x] |                                          |
+| `GET /books/{id}/export/html`                     | [x]    | [x] |                                          |
 
 Client-side DOCX/PDF in `src/lib/export.ts` is separate from backend export routes.
 
