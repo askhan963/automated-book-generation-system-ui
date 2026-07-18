@@ -41,9 +41,9 @@ Legend: `[ ]` todo · `[~]` partial · `[x]` done
 
 ## 2. Client correctness
 
-- [ ] Handle `204 No Content` in `request()` (no `res.json()`)
-- [ ] Preserve HTTP status on API errors (e.g. `ApiError`)
-- [ ] Query-parameter helper for list filters
+- [x] Handle `204 No Content` in `request()` (no `res.json()`)
+- [x] Preserve HTTP status on API errors (e.g. `ApiError`)
+- [x] Query-parameter helper for list filters
 - [ ] Resolve export `{ url }` against backend origin (`/exports/...`)
 - [ ] Align `BookResponse` with contract (`owner_id`, `genre`, `tone`, `audience`, `length`)
 - [ ] Extend `generateOutline` body: `genre?`, `tone?`, `audience?`, `length?`
@@ -131,5 +131,5 @@ Receiver routes are public; only wire if the UI needs to call them.
 - [~] Auth-aware header (login/register vs user menu)
 - [ ] Audit query invalidation after every mutation
 - [ ] User-scope `quill.recent-books` (or clear on logout)
-- [ ] Do not retry queries on `401`
+- [x] Do not retry queries on `401`
 - [ ] Lint / typecheck after each integration pass

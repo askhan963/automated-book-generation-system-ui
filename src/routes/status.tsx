@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import { CheckCircle2, AlertCircle, XCircle, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/status")({
@@ -18,7 +19,7 @@ function dot(status: string) {
 
 function StatusPage() {
   const { data, isLoading, error, refetch, isFetching } = useQuery({
-    queryKey: ["health"],
+    queryKey: queryKeys.health,
     queryFn: api.health,
     refetchInterval: 30_000,
   });
@@ -29,7 +30,9 @@ function StatusPage() {
         Diagnostics
       </p>
       <h1 className="mb-2 font-display text-5xl">Service status</h1>
-      <p className="text-muted-foreground">Live checks against the Quill API.</p>
+      <p className="text-muted-foreground">
+        Live checks against the Quill API.
+      </p>
 
       <div className="mt-8 rounded-2xl border border-border bg-card p-8">
         {isLoading ? (
@@ -43,7 +46,9 @@ function StatusPage() {
           <div className="space-y-5">
             <div className="flex items-center justify-between border-b border-border pb-4">
               <div>
-                <p className="font-display text-2xl capitalize">{data.status}</p>
+                <p className="font-display text-2xl capitalize">
+                  {data.status}
+                </p>
                 <p className="text-sm text-muted-foreground">{data.message}</p>
               </div>
               {dot(data.status)}

@@ -22,6 +22,7 @@ import {
   type ChapterResponse,
   type StageStatus,
 } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { StageBadge, PhaseBadge } from "@/components/badges";
@@ -50,12 +51,12 @@ function BookWorkspaceContent() {
   const navigate = useNavigate();
 
   const bookQ = useQuery({
-    queryKey: ["book", bookId],
+    queryKey: queryKeys.book(bookId),
     queryFn: () => api.getBook(bookId),
     refetchOnWindowFocus: false,
   });
   const chaptersQ = useQuery({
-    queryKey: ["chapters", bookId],
+    queryKey: queryKeys.chapters(bookId),
     queryFn: () => api.listChapters(bookId),
     enabled: !!bookQ.data,
   });
@@ -175,14 +176,23 @@ function BookWorkspaceContent() {
 
         <div className="min-w-0">
           {view === "outline" && (
-            <OutlineView book={book} onChange={() => qc.invalidateQueries({ queryKey: ["book", bookId] })} />
+            <OutlineView
+              book={book}
+              onChange={() =>
+                qc.invalidateQueries({ queryKey: queryKeys.book(bookId) })
+              }
+            />
           )}
           {view === "chapters" && (
             <ChaptersView book={book} chapters={chapters} bookId={bookId} />
           )}
           {view === "draft" && <DraftView bookId={bookId} />}
           {view === "publish" && (
-            <PublishView book={book} allApproved={allApproved} chaptersCount={generatedCount} />
+            <PublishView
+              book={book}
+              allApproved={allApproved}
+              chaptersCount={generatedCount}
+            />
           )}
         </div>
       </div>
@@ -229,7 +239,13 @@ function Step({
 
 /* ----------------------------- Outline view ----------------------------- */
 
-function OutlineView({ book, onChange }: { book: BookResponse; onChange: () => void }) {
+function OutlineView({
+  book,
+  onChange,
+}: {
+  book: BookResponse;
+  onChange: () => void;
+}) {
   const qc = useQueryClient();
   const [notes, setNotes] = useState(book.human_notes ?? "");
 
@@ -237,9 +253,10 @@ function OutlineView({ book, onChange }: { book: BookResponse; onChange: () => v
     mutationFn: (status: StageStatus) =>
       api.reviewOutline(book.id, { human_notes: notes, status }),
     onSuccess: (b) => {
-      qc.setQueryData(["book", book.id], b);
+      qc.setQueryData(queryKeys.book(book.id), b);
       toast.success(
-        b.outline_status === "approved" || b.outline_status === "no_notes_needed"
+        b.outline_status === "approved" ||
+          b.outline_status === "no_notes_needed"
           ? "Outline approved"
           : "Notes saved",
       );
@@ -250,7 +267,8 @@ function OutlineView({ book, onChange }: { book: BookResponse; onChange: () => v
 
   const outline = book.outline?.chapters ?? [];
   const isApproved =
-    book.outline_status === "approved" || book.outline_status === "no_notes_needed";
+    book.outline_status === "approved" ||
+    book.outline_status === "no_notes_needed";
 
   return (
     <section className="space-y-8">
@@ -351,8 +369,8 @@ function ChaptersView({
   const nextMut = useMutation({
     mutationFn: () => api.nextChapter(bookId),
     onSuccess: (ch) => {
-      qc.invalidateQueries({ queryKey: ["chapters", bookId] });
-      qc.invalidateQueries({ queryKey: ["book", bookId] });
+      qc.invalidateQueries({ queryKey: queryKeys.chapters(bookId) });
+      qc.invalidateQueries({ queryKey: queryKeys.book(bookId) });
       setSelectedId(ch.id);
       toast.success(`Chapter ${ch.chapter_number} drafted`);
     },
@@ -397,7 +415,9 @@ function ChaptersView({
       <div className="grid gap-6 md:grid-cols-[260px_1fr]">
         <aside className="space-y-1.5">
           {outline.map((o) => {
-            const ch = chapters.find((c) => c.chapter_number === o.chapter_number);
+            const ch = chapters.find(
+              (c) => c.chapter_number === o.chapter_number,
+            );
             const isSel = ch && ch.id === selectedId;
             return (
               <button
@@ -422,7 +442,9 @@ function ChaptersView({
                       <StageBadge status={ch.status} />
                     </div>
                   ) : (
-                    <p className="mt-0.5 text-xs text-muted-foreground">Not drafted</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Not drafted
+                    </p>
                   )}
                 </div>
               </button>
@@ -436,9 +458,12 @@ function ChaptersView({
           ) : (
             <div className="rounded-2xl border border-dashed border-border p-12 text-center">
               <BookOpen className="mx-auto h-8 w-8 text-muted-foreground" />
-              <p className="mt-3 font-display text-2xl">No chapter drafted yet</p>
+              <p className="mt-3 font-display text-2xl">
+                No chapter drafted yet
+              </p>
               <p className="text-sm text-muted-foreground">
-                Use “Draft chapter” to generate the first chapter from the outline.
+                Use “Draft chapter” to generate the first chapter from the
+                outline.
               </p>
             </div>
           )}
@@ -466,8 +491,10 @@ function ChapterEditor({
     mutationFn: (status: StageStatus) =>
       api.reviewChapter(chapter.id, { human_notes: notes, status }),
     onSuccess: (c) => {
-      qc.setQueryData(["chapters", bookId], (prev: ChapterResponse[] = []) =>
-        prev.map((x) => (x.id === c.id ? c : x)),
+      qc.setQueryData(
+        queryKeys.chapters(bookId),
+        (prev: ChapterResponse[] = []) =>
+          prev.map((x) => (x.id === c.id ? c : x)),
       );
       toast.success("Chapter approved");
     },
@@ -486,8 +513,10 @@ function ChapterEditor({
       return api.regenerateChapter(chapter.id);
     },
     onSuccess: (c) => {
-      qc.setQueryData(["chapters", bookId], (prev: ChapterResponse[] = []) =>
-        prev.map((x) => (x.id === c.id ? c : x)),
+      qc.setQueryData(
+        queryKeys.chapters(bookId),
+        (prev: ChapterResponse[] = []) =>
+          prev.map((x) => (x.id === c.id ? c : x)),
       );
       toast.success("Chapter regenerated");
     },
@@ -571,12 +600,12 @@ function ChapterEditor({
 
 function DraftView({ bookId }: { bookId: string }) {
   const { data, isLoading, error } = useQuery({
-    queryKey: ["draft", bookId],
+    queryKey: queryKeys.draft(bookId),
     queryFn: () => api.getDraft(bookId),
   });
 
   const bookQ = useQuery({
-    queryKey: ["book", bookId],
+    queryKey: queryKeys.book(bookId),
     queryFn: () => api.getBook(bookId),
   });
 
@@ -607,7 +636,7 @@ function DraftView({ bookId }: { bookId: string }) {
       await exportToDocs(
         bookQ.data?.title || "Manuscript",
         content,
-        bookQ.data?.title || "manuscript"
+        bookQ.data?.title || "manuscript",
       );
       toast.success("Downloaded as DOCX");
     } catch (e) {
@@ -624,7 +653,7 @@ function DraftView({ bookId }: { bookId: string }) {
       exportToPdf(
         bookQ.data?.title || "Manuscript",
         content,
-        bookQ.data?.title || "manuscript"
+        bookQ.data?.title || "manuscript",
       );
       toast.success("Downloaded as PDF");
     } catch (e) {
@@ -741,9 +770,12 @@ function PublishView({
 
   const clear = useMutation({
     mutationFn: () =>
-      api.finalReview(book.id, { human_notes: notes, status: "no_notes_needed" }),
+      api.finalReview(book.id, {
+        human_notes: notes,
+        status: "no_notes_needed",
+      }),
     onSuccess: (b) => {
-      qc.setQueryData(["book", book.id], b);
+      qc.setQueryData(queryKeys.book(book.id), b);
       toast.success("Final review cleared");
     },
     onError: (e: Error) => toast.error(e.message),

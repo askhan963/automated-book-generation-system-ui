@@ -1,7 +1,8 @@
 import { createContext, useContext } from "react";
 import type { User } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 
-export const authMeQueryKey = ["auth", "me"] as const;
+export const authMeQueryKey = queryKeys.authMe;
 
 export interface AuthContextValue {
   user: User | null;

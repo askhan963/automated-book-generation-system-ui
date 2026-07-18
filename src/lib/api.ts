@@ -4,6 +4,38 @@ export const API_BASE =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
   "https://automated-book-generation-system-production.up.railway.app/api/v1";
 
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
+/** Build a `?…` query string; omits `undefined` / `null`. */
+export function buildQuery(
+  params: Record<string, string | number | boolean | null | undefined>,
+): string {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null) continue;
+    search.set(key, String(value));
+  }
+  const qs = search.toString();
+  return qs ? `?${qs}` : "";
+}
+
+/** TanStack Query retry policy: never retry unauthorized responses. */
+export function shouldRetryQuery(
+  failureCount: number,
+  error: unknown,
+): boolean {
+  if (error instanceof ApiError && error.status === 401) return false;
+  return failureCount < 3;
+}
+
 export type StageStatus =
   | "pending_notes"
   | "pending_review"
@@ -83,7 +115,30 @@ function handleUnauthorized(): void {
   window.location.assign("/login");
 }
 
-async function request<T>(
+function flattenDetail(data: unknown, fallback: string): string {
+  if (!data || typeof data !== "object") return fallback;
+  const detail = (data as { detail?: unknown }).detail;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    return detail
+      .map((d: { msg?: string }) => d.msg)
+      .filter(Boolean)
+      .join(", ");
+  }
+  if (detail !== undefined) return JSON.stringify(detail);
+  return fallback;
+}
+
+async function readErrorMessage(res: Response): Promise<string> {
+  try {
+    const data = await res.json();
+    return flattenDetail(data, res.statusText);
+  } catch {
+    return res.statusText;
+  }
+}
+
+export async function request<T>(
   path: string,
   init?: RequestInit & { json?: unknown },
 ): Promise<T> {
@@ -102,23 +157,16 @@ async function request<T>(
 
   if (!res.ok) {
     if (res.status === 401) handleUnauthorized();
-
-    let detail = res.statusText;
-    try {
-      const data = await res.json();
-      detail =
-        typeof data.detail === "string"
-          ? data.detail
-          : Array.isArray(data.detail)
-            ? data.detail.map((d: { msg?: string }) => d.msg).join(", ")
-            : JSON.stringify(data.detail ?? data);
-    } catch {
-      // ignore
-    }
-    throw new Error(detail);
+    throw new ApiError(await readErrorMessage(res), res.status);
   }
 
-  return (await res.json()) as T;
+  if (res.status === 204) {
+    return undefined as T;
+  }
+
+  const text = await res.text();
+  if (!text) return undefined as T;
+  return JSON.parse(text) as T;
 }
 
 export const api = {
@@ -138,19 +186,7 @@ export const api = {
     });
 
     if (!res.ok) {
-      let detail = res.statusText;
-      try {
-        const data = await res.json();
-        detail =
-          typeof data.detail === "string"
-            ? data.detail
-            : Array.isArray(data.detail)
-              ? data.detail.map((d: { msg?: string }) => d.msg).join(", ")
-              : JSON.stringify(data.detail ?? data);
-      } catch {
-        // ignore
-      }
-      throw new Error(detail);
+      throw new ApiError(await readErrorMessage(res), res.status);
     }
 
     return (await res.json()) as AuthTokenResponse;
