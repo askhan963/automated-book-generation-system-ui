@@ -43,6 +43,14 @@ export function SiteHeader() {
               Library
             </Link>
           )}
+          {!isLoading && user && (
+            <Link
+              to="/analytics"
+              className={linkClass(path.startsWith("/analytics"))}
+            >
+              Analytics
+            </Link>
+          )}
           <Link
             to="/status"
             className="ml-1 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-muted-foreground hover:bg-muted"

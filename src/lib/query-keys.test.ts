@@ -13,5 +13,6 @@ describe("queryKeys", () => {
     expect(queryKeys.draft("b1")).toEqual(["draft", "b1"]);
     expect(queryKeys.books).toEqual(["books"]);
     expect(queryKeys.health).toEqual(["health"]);
+    expect(queryKeys.stats).toEqual(["stats"]);
   });
 });

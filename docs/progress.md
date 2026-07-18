@@ -82,7 +82,7 @@ Client-side DOCX/PDF in `src/lib/export.ts` is separate from backend export rout
 
 | Endpoint     | Client | UI  |
 | ------------ | ------ | --- |
-| `GET /stats` | [ ]    | [ ] |
+| `GET /stats` | [x]    | [x] |
 
 ---
 

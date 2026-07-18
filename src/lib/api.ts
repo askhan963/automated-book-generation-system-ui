@@ -134,6 +134,33 @@ export interface HealthResponse {
   openrouter: { status: string; detail: string | null };
 }
 
+export interface StatsBookRow {
+  book_id: string;
+  title: string;
+  chapters_count: number;
+  estimated_token_usage: number;
+}
+
+export interface WritingStyleAnalytics {
+  genre_distribution: Record<string, number>;
+  tone_distribution: Record<string, number>;
+  audience_distribution: Record<string, number>;
+  length_distribution: Record<string, number>;
+}
+
+export interface TokenTrendPoint {
+  date: string;
+  estimated_tokens: number;
+}
+
+export interface StatsResponse {
+  total_books: number;
+  total_chapters: number;
+  books: StatsBookRow[];
+  writing_style_analytics: WritingStyleAnalytics;
+  token_consumption_trends: TokenTrendPoint[];
+}
+
 function handleUnauthorized(): void {
   clearToken();
   notifyUnauthorized();
@@ -260,6 +287,8 @@ async function requestBlob(path: string): Promise<CompileResult> {
 
 export const api = {
   health: () => request<HealthResponse>("/health"),
+
+  stats: () => request<StatsResponse>("/stats"),
 
   register: (body: { email: string; password: string }) =>
     request<User>("/auth/register", { method: "POST", json: body }),
