@@ -41,6 +41,14 @@ describe("SiteHeader", () => {
 
     render(<SiteHeader />);
 
+    expect(screen.getByRole("link", { name: "New book" })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    expect(screen.getByRole("link", { name: "Status" })).toHaveAttribute(
+      "href",
+      "/status",
+    );
     expect(screen.getByRole("link", { name: "Login" })).toHaveAttribute(
       "href",
       "/login",
@@ -72,6 +80,14 @@ describe("SiteHeader", () => {
 
     render(<SiteHeader />);
 
+    expect(screen.getByRole("link", { name: "New book" })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    expect(screen.getByRole("link", { name: "Status" })).toHaveAttribute(
+      "href",
+      "/status",
+    );
     expect(screen.getByRole("link", { name: "Library" })).toHaveAttribute(
       "href",
       "/library",
@@ -85,6 +101,47 @@ describe("SiteHeader", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Register" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps public navigation visible but hides auth navigation while loading", () => {
+    mockedUseAuth.mockReturnValue({
+      user: {
+        id: "user-1",
+        email: "reader@example.com",
+        role: "user",
+        created_at: "2026-07-18T00:00:00Z",
+        updated_at: "2026-07-18T00:00:00Z",
+      },
+      token: "token",
+      isLoading: true,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout,
+    });
+
+    render(<SiteHeader />);
+
+    expect(screen.getByRole("link", { name: "New book" })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    expect(screen.getByRole("link", { name: "Status" })).toHaveAttribute(
+      "href",
+      "/status",
+    );
+    expect(
+      screen.queryByRole("link", { name: "Library" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Login" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Register" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("reader@example.com")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Log out" }),
     ).not.toBeInTheDocument();
   });
 
