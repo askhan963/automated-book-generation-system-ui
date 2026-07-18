@@ -106,11 +106,11 @@ Client-side DOCX/PDF in `src/lib/export.ts` is separate from backend export rout
 
 | Endpoint                          | Client | UI  |
 | --------------------------------- | ------ | --- |
-| `POST /templates`                 | [ ]    | [ ] |
-| `GET /templates`                  | [ ]    | [ ] |
-| `GET /templates/{template_id}`    | [ ]    | [ ] |
-| `PATCH /templates/{template_id}`  | [ ]    | [ ] |
-| `DELETE /templates/{template_id}` | [ ]    | [ ] |
+| `POST /templates`                 | [x]    | [x] |
+| `GET /templates`                  | [x]    | [x] |
+| `GET /templates/{template_id}`    | [x]    | [x] |
+| `PATCH /templates/{template_id}`  | [x]    | [x] |
+| `DELETE /templates/{template_id}` | [x]    | [x] |
 
 ---
 

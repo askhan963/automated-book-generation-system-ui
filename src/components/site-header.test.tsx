@@ -66,6 +66,9 @@ describe("SiteHeader", () => {
     expect(
       screen.queryByRole("link", { name: "Projects" }),
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Templates" }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows library and the account email but hides auth links when logged in", () => {
@@ -105,6 +108,10 @@ describe("SiteHeader", () => {
     expect(screen.getByRole("link", { name: "Projects" })).toHaveAttribute(
       "href",
       "/projects",
+    );
+    expect(screen.getByRole("link", { name: "Templates" })).toHaveAttribute(
+      "href",
+      "/templates",
     );
     expect(
       screen.getByText("reader.with.a.long.address@example.com"),
@@ -152,6 +159,9 @@ describe("SiteHeader", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Projects" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Templates" }),
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Login" }),

@@ -202,6 +202,44 @@ export interface UpdateProjectKeyParams {
   expires_at?: string;
 }
 
+export interface Template {
+  id: string;
+  name: string;
+  description: string | null;
+  template_json: Record<string, unknown>;
+  category: string | null;
+  is_public: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TemplatesResponse {
+  templates: Template[];
+}
+
+export interface ListTemplatesParams {
+  category?: string;
+  public_only?: boolean;
+}
+
+export interface CreateTemplateBody {
+  name: string;
+  description?: string;
+  template_json: Record<string, unknown>;
+  category?: string;
+  is_public?: boolean;
+  created_by?: string;
+}
+
+export interface UpdateTemplateBody {
+  name?: string;
+  description?: string;
+  template_json?: Record<string, unknown>;
+  category?: string;
+  is_public?: boolean;
+}
+
 function handleUnauthorized(): void {
   clearToken();
   notifyUnauthorized();
@@ -455,4 +493,18 @@ export const api = {
     request<void>(`/projects/${projectId}/keys/${keyId}`, {
       method: "DELETE",
     }),
+
+  listTemplates: (params?: ListTemplatesParams) =>
+    request<TemplatesResponse>(`/templates${buildQuery(params ?? {})}`),
+
+  createTemplate: (body: CreateTemplateBody) =>
+    request<Template>("/templates", { method: "POST", json: body }),
+
+  getTemplate: (id: string) => request<Template>(`/templates/${id}`),
+
+  updateTemplate: (id: string, body: UpdateTemplateBody) =>
+    request<Template>(`/templates/${id}`, { method: "PATCH", json: body }),
+
+  deleteTemplate: (id: string) =>
+    request<void>(`/templates/${id}`, { method: "DELETE" }),
 };

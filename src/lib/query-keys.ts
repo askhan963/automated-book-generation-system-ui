@@ -10,4 +10,7 @@ export const queryKeys = {
   projects: ["projects"] as const,
   project: (id: string) => ["project", id] as const,
   projectKeys: (id: string) => ["project-keys", id] as const,
+  templates: (filters?: { category?: string; public_only?: boolean }) =>
+    ["templates", filters ?? {}] as const,
+  template: (id: string) => ["template", id] as const,
 };

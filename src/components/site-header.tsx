@@ -59,6 +59,14 @@ export function SiteHeader() {
               Projects
             </Link>
           )}
+          {!isLoading && user && (
+            <Link
+              to="/templates"
+              className={linkClass(path.startsWith("/templates"))}
+            >
+              Templates
+            </Link>
+          )}
           <Link
             to="/status"
             className="ml-1 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-muted-foreground hover:bg-muted"
