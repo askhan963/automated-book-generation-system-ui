@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { StageBadge, PhaseBadge } from "@/components/badges";
 import { RichTextEditor } from "@/components/rich-text-editor";
+import { RequireAuth } from "@/components/require-auth";
 import { downloadAsText, exportToDocs, exportToPdf } from "@/lib/export";
 
 export const Route = createFileRoute("/books/$bookId")({
@@ -36,6 +37,14 @@ export const Route = createFileRoute("/books/$bookId")({
 type View = "outline" | "chapters" | "draft" | "publish";
 
 function BookWorkspace() {
+  return (
+    <RequireAuth>
+      <BookWorkspaceContent />
+    </RequireAuth>
+  );
+}
+
+function BookWorkspaceContent() {
   const { bookId } = Route.useParams();
   const qc = useQueryClient();
   const navigate = useNavigate();

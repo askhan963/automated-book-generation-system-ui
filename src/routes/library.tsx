@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, BookMarked } from "lucide-react";
+import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/library")({
   head: () => ({
@@ -14,6 +15,14 @@ export const Route = createFileRoute("/library")({
 });
 
 function LibraryPage() {
+  return (
+    <RequireAuth>
+      <LibraryContent />
+    </RequireAuth>
+  );
+}
+
+function LibraryContent() {
   const { data: books = [], isLoading } = useQuery({
     queryKey: ["books"],
     queryFn: () => api.listBooks(),
