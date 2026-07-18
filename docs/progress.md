@@ -26,10 +26,10 @@ Legend: `[ ]` todo · `[~]` partial · `[x]` done
 
 - [x] `/login` route (RHF + zod + shadcn Form, sonner toasts)
 - [x] `/register` route (same patterns)
-- [x] After login/register: fetch `/auth/me`, cache user, redirect to `/library`
+- [~] After login/register: fetch `/auth/me`, cache user, redirect to `/library`
 - [x] Guard `/library` (redirect unauthenticated → `/login`)
 - [x] Guard `/books/$bookId` (redirect unauthenticated → `/login`)
-- [x] User menu / logout in `site-header.tsx`
+- [~] User menu / logout in `site-header.tsx`
 - [x] Hide Library link when logged out
 
 ### Authenticated downloads (next)
@@ -128,7 +128,7 @@ Receiver routes are public; only wire if the UI needs to call them.
 ## 8. App hardening
 
 - [ ] Library route error state
-- [x] Auth-aware header (login/register vs user menu)
+- [~] Auth-aware header (login/register vs user menu)
 - [ ] Audit query invalidation after every mutation
 - [ ] User-scope `quill.recent-books` (or clear on logout)
 - [ ] Do not retry queries on `401`
