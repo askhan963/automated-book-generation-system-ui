@@ -169,6 +169,67 @@ export async function request<T>(
   return JSON.parse(text) as T;
 }
 
+/** Backend origin without the `/api/v1` prefix (for `/exports/...` URLs). */
+export function backendOrigin(): string {
+  return API_BASE.replace(/\/api\/v1\/?$/, "");
+}
+
+/** Resolve a relative export path against the backend origin. */
+export function resolveExportUrl(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url;
+  const origin = backendOrigin();
+  return url.startsWith("/") ? `${origin}${url}` : `${origin}/${url}`;
+}
+
+export function parseContentDispositionFilename(
+  header: string | null,
+): string | null {
+  if (!header) return null;
+  const utf8 = /filename\*=UTF-8''([^;]+)/i.exec(header);
+  if (utf8?.[1]) {
+    try {
+      return decodeURIComponent(utf8[1]);
+    } catch {
+      return utf8[1];
+    }
+  }
+  const quoted = /filename="([^"]+)"/i.exec(header);
+  if (quoted?.[1]) return quoted[1];
+  const plain = /filename=([^;]+)/i.exec(header);
+  if (plain?.[1]) return plain[1].trim().replace(/^["']|["']$/g, "");
+  return null;
+}
+
+export type ExportFormat = "pdf" | "epub" | "markdown" | "html";
+
+export interface ExportUrlResponse {
+  url: string;
+}
+
+export interface CompileResult {
+  blob: Blob;
+  filename: string | null;
+}
+
+async function requestBlob(path: string): Promise<CompileResult> {
+  const headers = new Headers();
+  const token = getToken();
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+
+  const res = await fetch(`${API_BASE}${path}`, { headers });
+
+  if (!res.ok) {
+    if (res.status === 401) handleUnauthorized();
+    throw new ApiError(await readErrorMessage(res), res.status);
+  }
+
+  const blob = await res.blob();
+  const filename = parseContentDispositionFilename(
+    res.headers.get("Content-Disposition"),
+  );
+  return { blob, filename };
+}
+
 export const api = {
   health: () => request<HealthResponse>("/health"),
 
@@ -239,5 +300,10 @@ export const api = {
   regenerateChapter: (id: string) =>
     request<ChapterResponse>(`/chapters/${id}/regenerate`, { method: "POST" }),
 
-  compileUrl: (id: string) => `${API_BASE}/books/${id}/compile`,
+  /** Authenticated manuscript text download (final review must be cleared). */
+  compileBook: (id: string) => requestBlob(`/books/${id}/compile`),
+
+  /** Authenticated export job; returns a relative `/exports/...` URL. */
+  exportBook: (id: string, format: ExportFormat) =>
+    request<ExportUrlResponse>(`/books/${id}/export/${format}`),
 };

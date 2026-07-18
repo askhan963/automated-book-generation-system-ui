@@ -34,8 +34,8 @@ Legend: `[ ]` todo · `[~]` partial · `[x]` done
 
 ### Authenticated downloads (next)
 
-- [ ] `GET /books/{id}/compile` as authenticated blob (not bare `<a href>`)
-- [ ] Export routes fetched with auth header → `{ url }` then download
+- [x] `GET /books/{id}/compile` as authenticated blob (not bare `<a href>`)
+- [x] Export routes fetched with auth header → `{ url }` then download
 
 ---
 
@@ -44,7 +44,7 @@ Legend: `[ ]` todo · `[~]` partial · `[x]` done
 - [x] Handle `204 No Content` in `request()` (no `res.json()`)
 - [x] Preserve HTTP status on API errors (e.g. `ApiError`)
 - [x] Query-parameter helper for list filters
-- [ ] Resolve export `{ url }` against backend origin (`/exports/...`)
+- [x] Resolve export `{ url }` against backend origin (`/exports/...`)
 - [ ] Align `BookResponse` with contract (`owner_id`, `genre`, `tone`, `audience`, `length`)
 - [ ] Extend `generateOutline` body: `genre?`, `tone?`, `audience?`, `length?`
 
@@ -52,27 +52,27 @@ Legend: `[ ]` todo · `[~]` partial · `[x]` done
 
 ## 3. Books & generation
 
-| Endpoint                                          | Client | UI  | Notes                                |
-| ------------------------------------------------- | ------ | --- | ------------------------------------ |
-| `GET /health`                                     | [x]    | [x] | Public (`/status`)                   |
-| `GET /books`                                      | [x]    | [x] | Needs auth header                    |
-| `POST /generate-outline`                          | [x]    | [x] | Missing style fields                 |
-| `GET /books/{id}`                                 | [x]    | [x] |                                      |
-| `PATCH /books/{id}/outline`                       | [x]    | [x] |                                      |
-| `PATCH /books/{id}/final-review`                  | [x]    | [x] |                                      |
-| `POST /books/{id}/chapters/next`                  | [x]    | [x] |                                      |
-| `GET /books/{id}/chapters`                        | [x]    | [x] |                                      |
-| `PATCH /chapters/{id}`                            | [x]    | [x] |                                      |
-| `POST /chapters/{id}/regenerate`                  | [x]    | [x] |                                      |
-| `GET /books/{id}/draft`                           | [x]    | [x] |                                      |
-| `GET /books/{id}/compile`                         | [~]    | [~] | URL helper only; bare fetch, no auth |
-| `POST /books`                                     | [ ]    | [ ] | Create + sync outline                |
-| `POST /generate-chapter`                          | [ ]    | [ ] |                                      |
-| `POST /books/{id}/chapters/{chapter_id}/moderate` | [ ]    | [ ] |                                      |
-| `GET /books/{id}/export/pdf`                      | [ ]    | [ ] | Returns `{ url }`                    |
-| `GET /books/{id}/export/epub`                     | [ ]    | [ ] |                                      |
-| `GET /books/{id}/export/markdown`                 | [ ]    | [ ] |                                      |
-| `GET /books/{id}/export/html`                     | [ ]    | [ ] |                                      |
+| Endpoint                                          | Client | UI  | Notes                       |
+| ------------------------------------------------- | ------ | --- | --------------------------- |
+| `GET /health`                                     | [x]    | [x] | Public (`/status`)          |
+| `GET /books`                                      | [x]    | [x] | Needs auth header           |
+| `POST /generate-outline`                          | [x]    | [x] | Missing style fields        |
+| `GET /books/{id}`                                 | [x]    | [x] |                             |
+| `PATCH /books/{id}/outline`                       | [x]    | [x] |                             |
+| `PATCH /books/{id}/final-review`                  | [x]    | [x] |                             |
+| `POST /books/{id}/chapters/next`                  | [x]    | [x] |                             |
+| `GET /books/{id}/chapters`                        | [x]    | [x] |                             |
+| `PATCH /chapters/{id}`                            | [x]    | [x] |                             |
+| `POST /chapters/{id}/regenerate`                  | [x]    | [x] |                             |
+| `GET /books/{id}/draft`                           | [x]    | [x] |                             |
+| `GET /books/{id}/compile`                         | [x]    | [x] | Authenticated blob download |
+| `POST /books`                                     | [ ]    | [ ] | Create + sync outline       |
+| `POST /generate-chapter`                          | [ ]    | [ ] |                             |
+| `POST /books/{id}/chapters/{chapter_id}/moderate` | [ ]    | [ ] |                             |
+| `GET /books/{id}/export/pdf`                      | [x]    | [x] | Returns `{ url }`           |
+| `GET /books/{id}/export/epub`                     | [x]    | [x] |                             |
+| `GET /books/{id}/export/markdown`                 | [x]    | [x] |                             |
+| `GET /books/{id}/export/html`                     | [x]    | [x] |                             |
 
 Client-side DOCX/PDF in `src/lib/export.ts` is separate from backend export routes.
 

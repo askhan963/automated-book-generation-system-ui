@@ -16,10 +16,19 @@ import {
 } from "lucide-react";
 
 import {
+  downloadAsText,
+  downloadBlob,
+  exportToDocs,
+  exportToPdf,
+} from "@/lib/export";
+import {
   api,
   type BookResponse,
   type ChapterResponse,
+  type ExportFormat,
   type StageStatus,
+  resolveExportUrl,
+  parseContentDispositionFilename,
 } from "@/lib/api";
 import { rememberBook } from "@/lib/recent-books";
 import { queryKeys } from "@/lib/query-keys";
@@ -30,7 +39,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { StageBadge, PhaseBadge } from "@/components/badges";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { RequireAuth } from "@/components/require-auth";
-import { downloadAsText, exportToDocs, exportToPdf } from "@/lib/export";
 
 export const Route = createFileRoute("/books/$bookId")({
   head: () => ({ meta: [{ title: "Workspace — Quill" }] }),
@@ -786,22 +794,45 @@ function PublishView({
   });
 
   const canDownload = book.final_review_notes_status === "no_notes_needed";
+  const [downloadBusy, setDownloadBusy] = useState<string | null>(null);
 
-  const download = async () => {
+  const downloadCompile = async () => {
     try {
-      const res = await fetch(api.compileUrl(book.id));
-      if (!res.ok) throw new Error(await res.text());
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      const cd = res.headers.get("Content-Disposition") ?? "";
-      const match = cd.match(/filename="(.+)"/);
-      a.href = url;
-      a.download = match?.[1] ?? `${book.title}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
+      setDownloadBusy("compile");
+      const { blob, filename } = await api.compileBook(book.id);
+      downloadBlob(blob, filename ?? `${book.title}.txt`);
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(e instanceof Error ? e.message : "Download failed");
+    } finally {
+      setDownloadBusy(null);
+    }
+  };
+
+  const downloadExport = async (format: ExportFormat) => {
+    const extensions: Record<ExportFormat, string> = {
+      pdf: "pdf",
+      epub: "epub",
+      markdown: "md",
+      html: "html",
+    };
+    try {
+      setDownloadBusy(format);
+      const { url } = await api.exportBook(book.id, format);
+      const absolute = resolveExportUrl(url);
+      const res = await fetch(absolute);
+      if (!res.ok) {
+        throw new Error(`Export download failed (${res.status})`);
+      }
+      const blob = await res.blob();
+      const filename =
+        parseContentDispositionFilename(
+          res.headers.get("Content-Disposition"),
+        ) ?? `${book.title}.${extensions[format]}`;
+      downloadBlob(blob, filename);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Export failed");
+    } finally {
+      setDownloadBusy(null);
     }
   };
 
@@ -847,14 +878,44 @@ function PublishView({
             Clear final review
           </Button>
           <Button
-            disabled={!canDownload}
-            onClick={download}
+            disabled={!canDownload || downloadBusy !== null}
+            onClick={() => void downloadCompile()}
             className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            <Download className="mr-2 h-4 w-4" />
+            {downloadBusy === "compile" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
             Download manuscript
           </Button>
         </div>
+        {canDownload && (
+          <div className="flex flex-wrap justify-end gap-2 border-t border-border pt-4">
+            {(
+              [
+                ["pdf", "PDF"],
+                ["epub", "EPUB"],
+                ["markdown", "Markdown"],
+                ["html", "HTML"],
+              ] as const
+            ).map(([format, label]) => (
+              <Button
+                key={format}
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={downloadBusy !== null}
+                onClick={() => void downloadExport(format)}
+              >
+                {downloadBusy === format ? (
+                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                ) : null}
+                Export {label}
+              </Button>
+            ))}
+          </div>
+        )}
         {!allApproved && (
           <p className="text-right text-xs text-muted-foreground">
             Approve every chapter before clearing final review.
