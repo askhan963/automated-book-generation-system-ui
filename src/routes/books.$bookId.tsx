@@ -17,12 +17,14 @@ import {
 
 import {
   api,
-  rememberBook,
   type BookResponse,
   type ChapterResponse,
   type StageStatus,
 } from "@/lib/api";
+import { rememberBook } from "@/lib/recent-books";
 import { queryKeys } from "@/lib/query-keys";
+import { invalidateBookCaches } from "@/lib/query-invalidation";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { StageBadge, PhaseBadge } from "@/components/badges";
@@ -49,6 +51,7 @@ function BookWorkspaceContent() {
   const { bookId } = Route.useParams();
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const bookQ = useQuery({
     queryKey: queryKeys.book(bookId),
@@ -65,8 +68,8 @@ function BookWorkspaceContent() {
   const chapters = chaptersQ.data ?? [];
 
   useEffect(() => {
-    if (book) rememberBook(book);
-  }, [book]);
+    if (book && user) rememberBook(user.id, book);
+  }, [book, user]);
 
   const [view, setView] = useState<View>("outline");
   useEffect(() => {
@@ -178,9 +181,7 @@ function BookWorkspaceContent() {
           {view === "outline" && (
             <OutlineView
               book={book}
-              onChange={() =>
-                qc.invalidateQueries({ queryKey: queryKeys.book(bookId) })
-              }
+              onChange={() => void invalidateBookCaches(qc, bookId)}
             />
           )}
           {view === "chapters" && (
@@ -254,6 +255,7 @@ function OutlineView({
       api.reviewOutline(book.id, { human_notes: notes, status }),
     onSuccess: (b) => {
       qc.setQueryData(queryKeys.book(book.id), b);
+      void invalidateBookCaches(qc, book.id);
       toast.success(
         b.outline_status === "approved" ||
           b.outline_status === "no_notes_needed"
@@ -369,8 +371,7 @@ function ChaptersView({
   const nextMut = useMutation({
     mutationFn: () => api.nextChapter(bookId),
     onSuccess: (ch) => {
-      qc.invalidateQueries({ queryKey: queryKeys.chapters(bookId) });
-      qc.invalidateQueries({ queryKey: queryKeys.book(bookId) });
+      void invalidateBookCaches(qc, bookId);
       setSelectedId(ch.id);
       toast.success(`Chapter ${ch.chapter_number} drafted`);
     },
@@ -496,6 +497,7 @@ function ChapterEditor({
         (prev: ChapterResponse[] = []) =>
           prev.map((x) => (x.id === c.id ? c : x)),
       );
+      void invalidateBookCaches(qc, bookId);
       toast.success("Chapter approved");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -518,6 +520,7 @@ function ChapterEditor({
         (prev: ChapterResponse[] = []) =>
           prev.map((x) => (x.id === c.id ? c : x)),
       );
+      void invalidateBookCaches(qc, bookId);
       toast.success("Chapter regenerated");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -776,6 +779,7 @@ function PublishView({
       }),
     onSuccess: (b) => {
       qc.setQueryData(queryKeys.book(book.id), b);
+      void invalidateBookCaches(qc, book.id);
       toast.success("Final review cleared");
     },
     onError: (e: Error) => toast.error(e.message),

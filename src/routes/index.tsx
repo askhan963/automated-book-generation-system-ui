@@ -1,10 +1,19 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowRight, Feather, Loader2, ScrollText, PenLine } from "lucide-react";
+import {
+  ArrowRight,
+  Feather,
+  Loader2,
+  ScrollText,
+  PenLine,
+} from "lucide-react";
 
-import { api, getRecentBooks, rememberBook } from "@/lib/api";
+import { api } from "@/lib/api";
+import { getRecentBooks, rememberBook } from "@/lib/recent-books";
+import { queryKeys } from "@/lib/query-keys";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,20 +35,23 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { user, isLoading: authLoading } = useAuth();
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
 
   const generate = useMutation({
     mutationFn: () => api.generateOutline({ title, notes: notes || undefined }),
     onSuccess: (book) => {
-      rememberBook(book);
+      if (user) rememberBook(user.id, book);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.books });
       toast.success("Outline drafted");
       navigate({ to: "/books/$bookId", params: { bookId: book.id } });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const recent = getRecentBooks();
+  const recent = !authLoading && user ? getRecentBooks(user.id) : [];
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
@@ -97,7 +109,10 @@ function HomePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-xs uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="title"
+                className="text-xs uppercase tracking-wider text-muted-foreground"
+              >
                 Working title
               </Label>
               <Input
@@ -112,8 +127,12 @@ function HomePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes" className="text-xs uppercase tracking-wider text-muted-foreground">
-                Notes for the AI <span className="text-muted-foreground/60">(optional)</span>
+              <Label
+                htmlFor="notes"
+                className="text-xs uppercase tracking-wider text-muted-foreground"
+              >
+                Notes for the AI{" "}
+                <span className="text-muted-foreground/60">(optional)</span>
               </Label>
               <Textarea
                 id="notes"
@@ -158,7 +177,10 @@ function HomePage() {
                   <button
                     key={b.id}
                     onClick={() =>
-                      navigate({ to: "/books/$bookId", params: { bookId: b.id } })
+                      navigate({
+                        to: "/books/$bookId",
+                        params: { bookId: b.id },
+                      })
                     }
                     className="group flex w-full items-center justify-between rounded-lg border border-border bg-card/60 px-4 py-3 text-left transition-colors hover:bg-card"
                   >

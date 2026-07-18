@@ -52,27 +52,27 @@ Legend: `[ ]` todo · `[~]` partial · `[x]` done
 
 ## 3. Books & generation
 
-| Endpoint | Client | UI | Notes |
-|---|---|---|---|
-| `GET /health` | [x] | [x] | Public (`/status`) |
-| `GET /books` | [x] | [x] | Needs auth header |
-| `POST /generate-outline` | [x] | [x] | Missing style fields |
-| `GET /books/{id}` | [x] | [x] | |
-| `PATCH /books/{id}/outline` | [x] | [x] | |
-| `PATCH /books/{id}/final-review` | [x] | [x] | |
-| `POST /books/{id}/chapters/next` | [x] | [x] | |
-| `GET /books/{id}/chapters` | [x] | [x] | |
-| `PATCH /chapters/{id}` | [x] | [x] | |
-| `POST /chapters/{id}/regenerate` | [x] | [x] | |
-| `GET /books/{id}/draft` | [x] | [x] | |
-| `GET /books/{id}/compile` | [~] | [~] | URL helper only; bare fetch, no auth |
-| `POST /books` | [ ] | [ ] | Create + sync outline |
-| `POST /generate-chapter` | [ ] | [ ] | |
-| `POST /books/{id}/chapters/{chapter_id}/moderate` | [ ] | [ ] | |
-| `GET /books/{id}/export/pdf` | [ ] | [ ] | Returns `{ url }` |
-| `GET /books/{id}/export/epub` | [ ] | [ ] | |
-| `GET /books/{id}/export/markdown` | [ ] | [ ] | |
-| `GET /books/{id}/export/html` | [ ] | [ ] | |
+| Endpoint                                          | Client | UI  | Notes                                |
+| ------------------------------------------------- | ------ | --- | ------------------------------------ |
+| `GET /health`                                     | [x]    | [x] | Public (`/status`)                   |
+| `GET /books`                                      | [x]    | [x] | Needs auth header                    |
+| `POST /generate-outline`                          | [x]    | [x] | Missing style fields                 |
+| `GET /books/{id}`                                 | [x]    | [x] |                                      |
+| `PATCH /books/{id}/outline`                       | [x]    | [x] |                                      |
+| `PATCH /books/{id}/final-review`                  | [x]    | [x] |                                      |
+| `POST /books/{id}/chapters/next`                  | [x]    | [x] |                                      |
+| `GET /books/{id}/chapters`                        | [x]    | [x] |                                      |
+| `PATCH /chapters/{id}`                            | [x]    | [x] |                                      |
+| `POST /chapters/{id}/regenerate`                  | [x]    | [x] |                                      |
+| `GET /books/{id}/draft`                           | [x]    | [x] |                                      |
+| `GET /books/{id}/compile`                         | [~]    | [~] | URL helper only; bare fetch, no auth |
+| `POST /books`                                     | [ ]    | [ ] | Create + sync outline                |
+| `POST /generate-chapter`                          | [ ]    | [ ] |                                      |
+| `POST /books/{id}/chapters/{chapter_id}/moderate` | [ ]    | [ ] |                                      |
+| `GET /books/{id}/export/pdf`                      | [ ]    | [ ] | Returns `{ url }`                    |
+| `GET /books/{id}/export/epub`                     | [ ]    | [ ] |                                      |
+| `GET /books/{id}/export/markdown`                 | [ ]    | [ ] |                                      |
+| `GET /books/{id}/export/html`                     | [ ]    | [ ] |                                      |
 
 Client-side DOCX/PDF in `src/lib/export.ts` is separate from backend export routes.
 
@@ -80,37 +80,37 @@ Client-side DOCX/PDF in `src/lib/export.ts` is separate from backend export rout
 
 ## 4. Analytics
 
-| Endpoint | Client | UI |
-|---|---|---|
-| `GET /stats` | [ ] | [ ] |
+| Endpoint     | Client | UI  |
+| ------------ | ------ | --- |
+| `GET /stats` | [ ]    | [ ] |
 
 ---
 
 ## 5. Projects (Bearer; `/{proj_id}` also accepts `x-api-key`)
 
-| Endpoint | Client | UI |
-|---|---|---|
-| `POST /projects/` | [ ] | [ ] |
-| `GET /projects/` | [ ] | [ ] |
-| `GET /projects/{proj_id}` | [ ] | [ ] |
-| `PATCH /projects/{proj_id}` | [ ] | [ ] |
-| `DELETE /projects/{proj_id}` | [ ] | [ ] |
-| `POST /projects/{proj_id}/keys` | [ ] | [ ] |
-| `GET /projects/{proj_id}/keys` | [ ] | [ ] |
-| `PATCH /projects/{proj_id}/keys/{key_id}` | [ ] | [ ] |
-| `DELETE /projects/{proj_id}/keys/{key_id}` | [ ] | [ ] |
+| Endpoint                                   | Client | UI  |
+| ------------------------------------------ | ------ | --- |
+| `POST /projects/`                          | [ ]    | [ ] |
+| `GET /projects/`                           | [ ]    | [ ] |
+| `GET /projects/{proj_id}`                  | [ ]    | [ ] |
+| `PATCH /projects/{proj_id}`                | [ ]    | [ ] |
+| `DELETE /projects/{proj_id}`               | [ ]    | [ ] |
+| `POST /projects/{proj_id}/keys`            | [ ]    | [ ] |
+| `GET /projects/{proj_id}/keys`             | [ ]    | [ ] |
+| `PATCH /projects/{proj_id}/keys/{key_id}`  | [ ]    | [ ] |
+| `DELETE /projects/{proj_id}/keys/{key_id}` | [ ]    | [ ] |
 
 ---
 
 ## 6. Templates (all require Bearer)
 
-| Endpoint | Client | UI |
-|---|---|---|
-| `POST /templates` | [ ] | [ ] |
-| `GET /templates` | [ ] | [ ] |
-| `GET /templates/{template_id}` | [ ] | [ ] |
-| `PATCH /templates/{template_id}` | [ ] | [ ] |
-| `DELETE /templates/{template_id}` | [ ] | [ ] |
+| Endpoint                          | Client | UI  |
+| --------------------------------- | ------ | --- |
+| `POST /templates`                 | [ ]    | [ ] |
+| `GET /templates`                  | [ ]    | [ ] |
+| `GET /templates/{template_id}`    | [ ]    | [ ] |
+| `PATCH /templates/{template_id}`  | [ ]    | [ ] |
+| `DELETE /templates/{template_id}` | [ ]    | [ ] |
 
 ---
 
@@ -118,18 +118,18 @@ Client-side DOCX/PDF in `src/lib/export.ts` is separate from backend export rout
 
 Receiver routes are public; only wire if the UI needs to call them.
 
-| Endpoint | Client | UI |
-|---|---|---|
-| `POST /webhooks/outline-approved` | [ ] | [ ] |
-| `POST /webhooks/chapter-completed` | [ ] | [ ] |
+| Endpoint                           | Client | UI  |
+| ---------------------------------- | ------ | --- |
+| `POST /webhooks/outline-approved`  | [ ]    | [ ] |
+| `POST /webhooks/chapter-completed` | [ ]    | [ ] |
 
 ---
 
 ## 8. App hardening
 
-- [ ] Library route error state
+- [x] Library route error state
 - [~] Auth-aware header (login/register vs user menu)
-- [ ] Audit query invalidation after every mutation
-- [ ] User-scope `quill.recent-books` (or clear on logout)
+- [x] Audit query invalidation after every mutation
+- [x] User-scope `quill.recent-books` (or clear on logout)
 - [x] Do not retry queries on `401`
 - [ ] Lint / typecheck after each integration pass

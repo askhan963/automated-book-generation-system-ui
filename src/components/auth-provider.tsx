@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -13,6 +14,7 @@ import {
   onUnauthorized,
   setToken,
 } from "@/lib/auth-storage";
+import { clearRecentBooks } from "@/lib/recent-books";
 import {
   AuthContext,
   authMeQueryKey,
@@ -23,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [token, setTokenState] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const userIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     setTokenState(getToken());
@@ -30,6 +33,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const clearSession = useCallback(() => {
+    if (userIdRef.current) clearRecentBooks(userIdRef.current);
+    clearRecentBooks();
+    userIdRef.current = null;
     setTokenState(null);
     queryClient.setQueryData(authMeQueryKey, null);
     queryClient.removeQueries({ queryKey: authMeQueryKey });
@@ -46,12 +52,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     staleTime: 60_000,
   });
 
+  useEffect(() => {
+    userIdRef.current = meQuery.data?.id ?? null;
+  }, [meQuery.data?.id]);
+
   const login = useCallback(
     async (email: string, password: string): Promise<User> => {
       const { access_token } = await api.login(email, password);
       setToken(access_token);
       setTokenState(access_token);
       const user = await api.me();
+      userIdRef.current = user.id;
       queryClient.setQueryData(authMeQueryKey, user);
       return user;
     },

@@ -241,28 +241,3 @@ export const api = {
 
   compileUrl: (id: string) => `${API_BASE}/books/${id}/compile`,
 };
-
-const KEY = "quill.recent-books";
-export interface RecentBook {
-  id: string;
-  title: string;
-  updated_at: string;
-}
-export function getRecentBooks(): RecentBook[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]");
-  } catch {
-    return [];
-  }
-}
-export function rememberBook(b: { id: string; title: string }) {
-  if (typeof window === "undefined") return;
-  const list = getRecentBooks().filter((x) => x.id !== b.id);
-  list.unshift({
-    id: b.id,
-    title: b.title,
-    updated_at: new Date().toISOString(),
-  });
-  localStorage.setItem(KEY, JSON.stringify(list.slice(0, 10)));
-}
