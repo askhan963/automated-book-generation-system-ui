@@ -14,14 +14,16 @@ export class ApiError extends Error {
   }
 }
 
+type QueryParamValue = string | number | boolean | null | undefined;
+
 /** Build a `?…` query string; omits `undefined` / `null`. */
 export function buildQuery(
-  params: Record<string, string | number | boolean | null | undefined>,
+  params: Record<string, QueryParamValue> | object,
 ): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null) continue;
-    search.set(key, String(value));
+    search.set(key, String(value as string | number | boolean));
   }
   const qs = search.toString();
   return qs ? `?${qs}` : "";

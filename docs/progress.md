@@ -117,11 +117,12 @@ Client-side DOCX/PDF in `src/lib/export.ts` is separate from backend export rout
 ## 7. Webhooks (optional FE)
 
 Receiver routes are public; only wire if the UI needs to call them.
+**Skipped for now** — no Quill UI surface needs to POST these receivers.
 
 | Endpoint                           | Client | UI  |
 | ---------------------------------- | ------ | --- |
-| `POST /webhooks/outline-approved`  | [ ]    | [ ] |
-| `POST /webhooks/chapter-completed` | [ ]    | [ ] |
+| `POST /webhooks/outline-approved`  | [–]    | [–] |
+| `POST /webhooks/chapter-completed` | [–]    | [–] |
 
 ---
 
@@ -132,4 +133,4 @@ Receiver routes are public; only wire if the UI needs to call them.
 - [x] Audit query invalidation after every mutation
 - [x] User-scope `quill.recent-books` (or clear on logout)
 - [x] Do not retry queries on `401`
-- [ ] Lint / typecheck after each integration pass
+- [x] Lint / typecheck after each integration pass
