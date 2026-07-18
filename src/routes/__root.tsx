@@ -9,9 +9,9 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { AuthProvider } from "@/components/auth-provider";
 import { SiteHeader } from "@/components/site-header";
 import { Toaster } from "@/components/ui/sonner";
-
 
 function NotFoundComponent() {
   return (
@@ -117,11 +117,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-paper-grain">
-        <SiteHeader />
-        <Outlet />
-        <Toaster richColors position="top-right" />
-      </div>
+      <AuthProvider>
+        <div className="min-h-screen bg-paper-grain">
+          <SiteHeader />
+          <Outlet />
+          <Toaster richColors position="top-right" />
+        </div>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

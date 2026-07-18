@@ -1,3 +1,5 @@
+import { clearToken, getToken } from "@/lib/auth-storage";
+
 export const API_BASE =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
   "https://automated-book-generation-system-production.up.railway.app/api/v1";
@@ -10,6 +12,22 @@ export type StageStatus =
   | "no_notes_needed";
 
 export type BookPhase = "outline" | "chapters" | "completed";
+
+export type UserRole = "user" | "admin";
+
+export interface User {
+  id: string;
+  email: string;
+  role: UserRole;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AuthTokenResponse {
+  access_token: string;
+  token_type: "bearer";
+  expires_in: number;
+}
 
 export interface OutlineChapter {
   chapter_number: number;
@@ -56,6 +74,14 @@ export interface HealthResponse {
   openrouter: { status: string; detail: string | null };
 }
 
+function handleUnauthorized(): void {
+  clearToken();
+  if (typeof window === "undefined") return;
+  const path = window.location.pathname;
+  if (path === "/login" || path === "/register") return;
+  window.location.assign("/login");
+}
+
 async function request<T>(
   path: string,
   init?: RequestInit & { json?: unknown },
@@ -64,6 +90,9 @@ async function request<T>(
   const headers = new Headers(rest.headers);
   if (json !== undefined) headers.set("Content-Type", "application/json");
 
+  const token = getToken();
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+
   const res = await fetch(`${API_BASE}${path}`, {
     ...rest,
     headers,
@@ -71,6 +100,8 @@ async function request<T>(
   });
 
   if (!res.ok) {
+    if (res.status === 401) handleUnauthorized();
+
     let detail = res.statusText;
     try {
       const data = await res.json();
@@ -91,6 +122,40 @@ async function request<T>(
 
 export const api = {
   health: () => request<HealthResponse>("/health"),
+
+  register: (body: { email: string; password: string }) =>
+    request<User>("/auth/register", { method: "POST", json: body }),
+
+  login: async (email: string, password: string) => {
+    const headers = new Headers({
+      "Content-Type": "application/x-www-form-urlencoded",
+    });
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: "POST",
+      headers,
+      body: new URLSearchParams({ username: email, password }),
+    });
+
+    if (!res.ok) {
+      let detail = res.statusText;
+      try {
+        const data = await res.json();
+        detail =
+          typeof data.detail === "string"
+            ? data.detail
+            : Array.isArray(data.detail)
+              ? data.detail.map((d: { msg?: string }) => d.msg).join(", ")
+              : JSON.stringify(data.detail ?? data);
+      } catch {
+        // ignore
+      }
+      throw new Error(detail);
+    }
+
+    return (await res.json()) as AuthTokenResponse;
+  },
+
+  me: () => request<User>("/auth/me"),
 
   listBooks: () => request<BookResponse[]>("/books"),
 
@@ -157,6 +222,10 @@ export function getRecentBooks(): RecentBook[] {
 export function rememberBook(b: { id: string; title: string }) {
   if (typeof window === "undefined") return;
   const list = getRecentBooks().filter((x) => x.id !== b.id);
-  list.unshift({ id: b.id, title: b.title, updated_at: new Date().toISOString() });
+  list.unshift({
+    id: b.id,
+    title: b.title,
+    updated_at: new Date().toISOString(),
+  });
   localStorage.setItem(KEY, JSON.stringify(list.slice(0, 10)));
 }
