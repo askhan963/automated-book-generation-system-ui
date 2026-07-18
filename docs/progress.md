@@ -45,8 +45,8 @@ Legend: `[ ]` todo · `[~]` partial · `[x]` done
 - [x] Preserve HTTP status on API errors (e.g. `ApiError`)
 - [x] Query-parameter helper for list filters
 - [x] Resolve export `{ url }` against backend origin (`/exports/...`)
-- [ ] Align `BookResponse` with contract (`owner_id`, `genre`, `tone`, `audience`, `length`)
-- [ ] Extend `generateOutline` body: `genre?`, `tone?`, `audience?`, `length?`
+- [x] Align `BookResponse` with contract (`owner_id`, `genre`, `tone`, `audience`, `length`)
+- [x] Extend `generateOutline` body: `genre?`, `tone?`, `audience?`, `length?`
 
 ---
 
@@ -56,7 +56,7 @@ Legend: `[ ]` todo · `[~]` partial · `[x]` done
 | ------------------------------------------------- | ------ | --- | --------------------------- |
 | `GET /health`                                     | [x]    | [x] | Public (`/status`)          |
 | `GET /books`                                      | [x]    | [x] | Needs auth header           |
-| `POST /generate-outline`                          | [x]    | [x] | Missing style fields        |
+| `POST /generate-outline`                          | [x]    | [x] | Style fields wired          |
 | `GET /books/{id}`                                 | [x]    | [x] |                             |
 | `PATCH /books/{id}/outline`                       | [x]    | [x] |                             |
 | `PATCH /books/{id}/final-review`                  | [x]    | [x] |                             |

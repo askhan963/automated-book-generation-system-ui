@@ -143,6 +143,13 @@ function BookWorkspaceContent() {
               </span>
             )}
           </div>
+          {(book.genre || book.tone || book.audience || book.length) && (
+            <p className="text-sm text-muted-foreground">
+              {[book.genre, book.tone, book.audience, book.length]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          )}
         </div>
         <div className="text-right text-xs text-muted-foreground">
           <p>Started {new Date(book.created_at).toLocaleDateString()}</p>

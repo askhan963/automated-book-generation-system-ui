@@ -76,8 +76,26 @@ export interface BookResponse {
   final_review_notes_status: StageStatus;
   phase: BookPhase;
   human_notes: string | null;
+  owner_id: string;
+  genre: string | null;
+  tone: string | null;
+  audience: string | null;
+  length: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/** Optional writing-style hints shared by outline/chapter generation. */
+export interface BookStyleFields {
+  genre?: string;
+  tone?: string;
+  audience?: string;
+  length?: string;
+}
+
+export interface GenerateOutlineBody extends BookStyleFields {
+  title: string;
+  notes?: string;
 }
 
 export interface ChapterResponse {
@@ -257,7 +275,7 @@ export const api = {
 
   listBooks: () => request<BookResponse[]>("/books"),
 
-  generateOutline: (body: { title: string; notes?: string }) =>
+  generateOutline: (body: GenerateOutlineBody) =>
     request<BookResponse>("/generate-outline", { method: "POST", json: body }),
 
   getBook: (id: string) => request<BookResponse>(`/books/${id}`),

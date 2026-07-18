@@ -39,9 +39,21 @@ function HomePage() {
   const { user, isLoading: authLoading } = useAuth();
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
+  const [genre, setGenre] = useState("");
+  const [tone, setTone] = useState("");
+  const [audience, setAudience] = useState("");
+  const [length, setLength] = useState("");
 
   const generate = useMutation({
-    mutationFn: () => api.generateOutline({ title, notes: notes || undefined }),
+    mutationFn: () =>
+      api.generateOutline({
+        title,
+        notes: notes.trim() || undefined,
+        genre: genre.trim() || undefined,
+        tone: tone.trim() || undefined,
+        audience: audience.trim() || undefined,
+        length: length.trim() || undefined,
+      }),
     onSuccess: (book) => {
       if (user) rememberBook(user.id, book);
       void queryClient.invalidateQueries({ queryKey: queryKeys.books });
@@ -138,10 +150,38 @@ function HomePage() {
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Genre, tone, key characters, themes, structure preferences…"
-                rows={6}
+                placeholder="Key characters, themes, structure preferences…"
+                rows={4}
                 className="resize-none border-border bg-secondary/40"
               />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {(
+                [
+                  ["genre", "Genre", genre, setGenre, "Literary fiction"],
+                  ["tone", "Tone", tone, setTone, "Melancholy"],
+                  ["audience", "Audience", audience, setAudience, "Adult"],
+                  ["length", "Length", length, setLength, "Novella"],
+                ] as const
+              ).map(([id, label, value, setValue, placeholder]) => (
+                <div key={id} className="space-y-2">
+                  <Label
+                    htmlFor={id}
+                    className="text-xs uppercase tracking-wider text-muted-foreground"
+                  >
+                    {label}{" "}
+                    <span className="text-muted-foreground/60">(optional)</span>
+                  </Label>
+                  <Input
+                    id={id}
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                    placeholder={placeholder}
+                    className="border-border bg-secondary/40"
+                  />
+                </div>
+              ))}
             </div>
 
             <Button
